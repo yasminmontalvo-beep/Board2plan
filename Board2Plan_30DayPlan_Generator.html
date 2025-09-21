@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>30‑Day Marketing Plan Generator — Board2Plan</title>
+  <meta name="description" content="Generate a 30‑day marketing plan Excel with analytics and a week‑one checklist, all in your browser." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #0ea5e9;
+      --ring: #bae6fd;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: linear-gradient(180deg, var(--bg), #fff);
+      color: var(--text);
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 28px; margin: 8px 0; }
+    p.lead { color: var(--muted); margin-top: 0; }
+    .card { background: var(--card); border: 1px solid #e5e7eb; border-radius: var(--radius); box-shadow: 0 2px 8px rgba(2, 6, 23, 0.04); }
+    .card-body { padding: 20px; display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 800px) { .card-body { grid-template-columns: 1fr 1fr; } }
+    label { font-size: 14px; color: var(--text); display: block; }
+    .input {
+      margin-top: 6px; width: 100%; height: 42px; padding: 0 12px; border-radius: 12px;
+      border: 1px solid #e2e8f0; outline: none; font-size: 14px; color: var(--text); background: #fff;
+    }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; height: 48px; border-radius: 9999px; border: 0;
+      background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
+    }
+    .btn:hover { filter: brightness(0.95); }
+    .grid { margin-top: 16px; display: grid; gap: 12px; }
+    @media (min-width: 800px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    .tile { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .footer { margin-top: 20px; font-size: 12px; color: var(--muted); }
+    .brand { font-weight: 700; color: var(--accent); letter-spacing: 0.2px; }
+  </style>
+  <!-- XLSX: client-side Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">Board2Plan</div>
+    <h1>30‑Day Marketing Plan Generator</h1>
+    <p class="lead">Create a client‑ready Excel with daily tasks, analytics (CTR & engagement formulas), and a week‑one checklist — no code needed.</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div>
+          <label for="start">Start date</label>
+          <input id="start" class="input" placeholder="YYYY-MM-DD" />
+        </div>
+        <div>
+          <label for="brand">Brand</label>
+          <input id="brand" class="input" value="Board2Plan" placeholder="e.g., Board2Plan" />
+        </div>
+        <div>
+          <label for="goal">Goal</label>
+          <input id="goal" class="input" value="Lead Generation" placeholder="e.g., Brand Awareness" />
+        </div>
+        <div>
+          <label for="file">Output file name</label>
+          <input id="file" class="input" value="30Day_Marketing_Plan.xlsx" placeholder="30Day_Marketing_Plan.xlsx" />
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <button id="download" class="btn">⬇️ Download Excel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="tile">
+        <strong>Sheet 1: 30 Day Marketing Plan</strong>
+        <div class="muted">Daily tasks (pillar, task, channel, CTA, owner, status) with your brand &amp; goal noted on Day 1.</div>
+      </div>
+      <div class="tile">
+        <strong>Sheet 2: Analytics</strong>
+        <div class="muted">KPI tracker with built‑in formulas for CTR and Engagement Rate.</div>
+      </div>
+      <div class="tile">
+        <strong>Sheet 3: Phase 1</strong>
+        <div class="muted">Week‑one execution checklist to kickstart momentum.</div>
+      </div>
+    </div>
+
+    <div class="footer">Tip: Customize pillars/tasks in the code to match niche or tier. © <span class="brand">Board2Plan</span></div>
+  </div>
+
+  <script>
+    const fmtDate = (d) => {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    };
+    const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+
+    const PILLARS = [
+      { name: 'Education', tasks: [
+        'Share an industry tip',
+        'Post a how-to guide',
+        'Explain a key term your audience asks about',
+        'Repurpose a blog into a carousel',
+      ]},
+      { name: 'Engagement', tasks: [
+        'Run a poll (IG/LinkedIn)',
+        'Ask a question and reply to 10 comments',
+        'Start a comment-to-DM conversation',
+        'Host a 15-min live Q&A',
+      ]},
+      { name: 'Promotion', tasks: [
+        'Spotlight a product/service benefit',
+        'Share a limited-time offer',
+        'Post a client testimonial (with visual)',
+        'Create a comparison post vs. alternatives',
+      ]},
+      { name: 'Storytelling', tasks: [
+        'Founder story: why you built this',
+        'Behind-the-scenes photo/video',
+        'Customer journey mini-case study',
+        'Milestone or lesson learned',
+      ]},
+    ];
+
+    function buildPlanSheet(startDate, brand, goal) {
+      const headerNote = [brand, goal ? `Goal: ${goal}` : null].filter(Boolean).join(' — ');
+      let pillarIdx = 0;
+      const taskIdxs = [0, 0, 0, 0];
+
+      const rows = Array.from({ length: 30 }, (_, i) => {
+        const pillar = PILLARS[pillarIdx];
+        const task = pillar.tasks[taskIdxs[pillarIdx] % pillar.tasks.length];
+        taskIdxs[pillarIdx]++;
+        pillarIdx = (pillarIdx + 1) % PILLARS.length;
+
+        return {
+          'Day': i + 1,
+          'Date': fmtDate(addDays(startDate, i)),
+          'Pillar': pillar.name,
+          'Primary Task': task,
+          'Content Angle / Hook': '',
+          'Channel (IG/FB/LI/TikTok/Email/Blog)': '',
+          'Asset Needed (video, image, carousel, blog)': '',
+          'CTA (book call, read more, shop, reply)': '',
+          'Owner': '',
+          'Status': 'Not started',
+          'Notes': i === 0 && headerNote ? headerNote : '',
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows, { origin: 0 });
+      ws['!cols'] = [
+        { wch: 5 }, { wch: 12 }, { wch: 14 }, { wch: 48 }, { wch: 28 },
+        { wch: 30 }, { wch: 36 }, { wch: 30 }, { wch: 14 }, { wch: 14 }, { wch: 36 },
+      ];
+      return ws;
+    }
+
+    function buildAnalyticsSheet(startDate) {
+      const rows = Array.from({ length: 30 }, (_, i) => ({
+        'Date': fmtDate(addDays(startDate, i)),
+        'Channel': '',
+        'Content': '',
+        'Impressions': '',
+        'Clicks': '',
+        'Likes': '',
+        'Comments': '',
+        'Shares': '',
+        'Saves': '',
+        'CTR': '',
+        'Engagement Rate': '',
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows, { origin: 0 });
+      for (let r = 2; r <= 31; r++) {
+        const ctrCell = `J${r}`;
+        const engCell = `K${r}`;
+        if (!ws[ctrCell]) ws[ctrCell] = {};
+        if (!ws[engCell]) ws[engCell] = {};
+        ws[ctrCell].f = `IFERROR(E${r}/D${r},0)`;
+        ws[engCell].f = `IFERROR((F${r}+G${r}+H${r}+I${r})/D${r},0)`;
+      }
+      ws['!cols'] = [
+        { wch: 12 }, { wch: 12 }, { wch: 30 }, { wch: 14 }, { wch: 10 },
+        { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 18 },
+      ];
+      return ws;
+    }
+
+    function buildPhase1Sheet() {
+      const header = ['Day', 'Task', 'Area', 'Owner', 'Status', 'Notes'];
+      const week1 = [
+        ['Day 1', 'Define campaign theme and single KPI', 'Strategy', '', 'Not started', ''],
+        ['Day 2', 'Audit channels and pick 2 primary platforms', 'Strategy', '', 'Not started', ''],
+        ['Day 3', 'Draft 10 content hooks & 5 CTAs', 'Creative', '', 'Not started', ''],
+        ['Day 4', 'Create 3 core assets (video, carousel, image)', 'Production', '', 'Not started', ''],
+        ['Day 5', 'Schedule next 7 days of posts', 'Operations', '', 'Not started', ''],
+        ['Day 6', 'Engage: 20 meaningful interactions', 'Community', '', 'Not started', ''],
+        ['Day 7', 'Report quick wins, adjust hooks/CTAs', 'Analytics', '', 'Not started', ''],
+      ];
+      const ws = XLSX.utils.aoa_to_sheet([header, ...week1]);
+      ws['!cols'] = [
+        { wch: 8 }, { wch: 48 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 36 },
+      ];
+      return ws;
+    }
+
+    function setDefaultStartDate() {
+      const input = document.getElementById('start');
+      const today = new Date();
+      input.value = fmtDate(today);
+    }
+
+    function onDownload() {
+      const startStr = document.getElementById('start').value.trim();
+      const brand = document.getElementById('brand').value.trim();
+      const goal = document.getElementById('goal').value.trim();
+      const fileName = (document.getElementById('file').value.trim() || '30Day_Marketing_Plan.xlsx')
+        .replace(/[^a-zA-Z0-9._-]+/g, '_');
+
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(startStr)) {
+        alert('Please enter a valid start date (YYYY-MM-DD)');
+        return;
+      }
+      const parts = startStr.split('-').map(Number);
+      const start = new Date(parts[0], parts[1] - 1, parts[2]);
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, buildPlanSheet(start, brand, goal), '30 Day Marketing Plan');
+      XLSX.utils.book_append_sheet(wb, buildAnalyticsSheet(start), 'Analytics');
+      XLSX.utils.book_append_sheet(wb, buildPhase1Sheet(), 'Phase 1');
+
+      XLSX.writeFile(wb, fileName);
+    }
+
+    document.getElementById('download')?.addEventListener('click', onDownload);
+    setDefaultStartDate();
+  </script>
+</body>
+</html>
