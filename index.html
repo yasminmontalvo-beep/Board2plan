@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Board2Plan – 30-Day Marketing Plan Generator</title>
+  <style>
+    body { font-family: Inter, sans-serif; background:#f8fafc; margin:0; color:#0f172a; }
+    .container { max-width: 720px; margin:0 auto; padding:32px; }
+    h1 { font-size:28px; margin-bottom:16px; }
+    label { display:block; font-size:14px; margin-bottom:4px; }
+    input { width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; font-size:14px; }
+    input:focus { border-color:#0ea5e9; outline:none; box-shadow:0 0 0 2px #bae6fd; }
+    button { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 16px; border:0; border-radius:9999px; background:#0ea5e9; color:#fff; font-weight:600; cursor:pointer; font-size:15px; }
+    button:hover { filter:brightness(.95); }
+    .card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:20px; box-shadow:0 2px 6px rgba(0,0,0,.05); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Board2Plan – 30-Day Marketing Plan</h1>
+    <div class="card">
+      <label for="start">Start date</label>
+      <input type="date" id="start" />
+      <label for="brand">Brand</label>
+      <input id="brand" value="Board2Plan" />
+      <label for="goal">Goal</label>
+      <input id="goal" value="Lead Generation" />
+      <label for="file">Output file name</label>
+      <input id="file" value="30Day_Marketing_Plan.xlsx" />
+      <button id="download">⬇️ Download Excel</button>
+    </div>
+  </div>
+
+  <script>
+    const fmtDate = (d) => {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      return `${yyyy}-${mm}-${dd}`;
+    };
+    const addDays = (d,n)=> new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+    const parseDateInput = (str) => {
+      if(!str) return null;
+      const parts = str.split('-').map(Number);
+      if(parts.length===3){
+        const d = new Date(parts[0], parts[1]-1, parts[2]);
+        return isNaN(d.getTime())?null:d;
+      }
+      return null;
+    };
+    const PILLARS=[
+      {name:'Education',tasks:['Share an industry tip','Post a how-to guide','Explain a key term','Repurpose a blog']},
+      {name:'Engagement',tasks:['Run a poll','Ask a question','Start a DM conversation','Host a Q&A']},
+      {name:'Promotion',tasks:['Spotlight a product','Share a limited-time offer','Post a testimonial','Comparison post']},
+      {name:'Storytelling',tasks:['Founder story','Behind-the-scenes','Customer journey','Milestone or lesson']}
+    ];
+    function buildPlanSheet(start,brand,goal){
+      let pillarIdx=0; const taskIdxs=[0,0,0,0];
+      const headerNote=[brand,goal?`Goal: ${goal}`:null].filter(Boolean).join(' — ');
+      const rows=Array.from({length:30},(_,i)=>{
+        const pillar=PILLARS[pillarIdx]; const task=pillar.tasks[taskIdxs[pillarIdx]%pillar.tasks.length];
+        taskIdxs[pillarIdx]++; pillarIdx=(pillarIdx+1)%PILLARS.length;
+        return {Day:i+1,Date:fmtDate(addDays(start,i)),Pillar:pillar.name,'Primary Task':task,'CTA':'','Owner':'','Status':'Not started','Notes':i===0?headerNote:''};
+      });
+      return XLSX.utils.json_to_sheet(rows);
+    }
+    function buildAnalyticsSheet(start){const rows=Array.from({length:30},(_,i)=>({Date:fmtDate(addDays(start,i)),Channel:'',Content:'',Impressions:'',Clicks:'',CTR:'',Engagement:''})); return XLSX.utils.json_to_sheet(rows);}
+    function buildPhase1Sheet(){const week1=[['Day','Task','Area','Owner','Status','Notes'],['Day 1','Define campaign theme','Strategy','','Not started',''],['Day 2','Audit channels','Strategy','','Not started','']]; return XLSX.utils.aoa_to_sheet(week1);}
+    document.getElementById('download').addEventListener('click',()=>{
+      const startStr=document.getElementById('start').value; const parsed=parseDateInput(startStr);
+      if(!parsed){alert('Please pick a valid date'); return;}
+      const brand=document.getElementById('brand').value.trim(); const goal=document.getElementById('goal').value.trim(); const file=document.getElementById('file').value.trim()||'30Day_Marketing_Plan.xlsx';
+      const wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,buildPlanSheet(parsed,brand,goal),'30 Day Marketing Plan');
+      XLSX.utils.book_append_sheet(wb,buildAnalyticsSheet(parsed),'Analytics');
+      XLSX.utils.book_append_sheet(wb,buildPhase1Sheet(),'Phase 1');
+      XLSX.writeFile(wb,file);
+    });
+  </script>
+</body>
+</html>
