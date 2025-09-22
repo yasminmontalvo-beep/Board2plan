@@ -3,37 +3,74 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Board2Plan – 30-Day Marketing Plan Generator</title>
+  <title>Board2Plan — 30‑Day Marketing Plan (Business‑Specific)</title>
+  <meta name="description" content="Generate a 30‑day marketing plan tailored to your business. Exports to Excel in one click." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <style>
-    body { font-family: Inter, sans-serif; background:#f8fafc; margin:0; color:#0f172a; }
-    .container { max-width: 720px; margin:0 auto; padding:32px; }
-    h1 { font-size:28px; margin-bottom:16px; }
-    label { display:block; font-size:14px; margin-bottom:4px; }
-    input { width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; font-size:14px; }
-    input:focus { border-color:#0ea5e9; outline:none; box-shadow:0 0 0 2px #bae6fd; }
-    button { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 16px; border:0; border-radius:9999px; background:#0ea5e9; color:#fff; font-weight:600; cursor:pointer; font-size:15px; }
-    button:hover { filter:brightness(.95); }
-    .card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:20px; box-shadow:0 2px 6px rgba(0,0,0,.05); }
+    :root { --ink:#0f172a; --muted:#64748b; --brand:#0ea5e9; --ring:#bae6fd; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:#f8fafc; color:var(--ink); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 28px; }
+    h1 { font-size: 28px; margin: 6px 0 10px; }
+    p.lead { color: var(--muted); margin: 0 0 16px; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 2px 8px rgba(2,6,23,.04); }
+    .card-body { padding:18px; }
+    .grid { display:grid; gap:12px; grid-template-columns: 1fr; }
+    @media (min-width: 800px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    label { font-size:13px; }
+    .input {
+      width:100%; height:42px; padding:0 10px; border:1px solid #cbd5e1; border-radius:10px; font-size:14px; background:#fff; color:var(--ink);
+    }
+    .input:focus { outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--ring); }
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px; height:46px; padding:0 18px;
+      border-radius:9999px; border:0; font-weight:700; cursor:pointer; background:var(--brand); color:#fff;
+    }
+    .footer { margin-top: 22px; padding-top: 14px; border-top: 1px solid #e5e7eb; color: var(--muted); font-size: 12px; text-align:center; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Board2Plan – 30-Day Marketing Plan</h1>
+  <div class="wrap">
+    <h1>Board2Plan — 30‑Day Marketing Plan (Business‑Specific)</h1>
+    <p class="lead">Fill in the fields below and download a tailored 30‑day plan as an Excel workbook.</p>
+
     <div class="card">
-      <label for="start">Start date</label>
-      <input type="date" id="start" />
-      <label for="brand">Brand</label>
-      <input id="brand" value="Board2Plan" />
-      <label for="goal">Goal</label>
-      <input id="goal" value="Lead Generation" />
-      <label for="file">Output file name</label>
-      <input id="file" value="30Day_Marketing_Plan.xlsx" />
-      <button id="download">⬇️ Download Excel</button>
+      <div class="card-body grid grid-2">
+        <div>
+          <label for="start">Start date</label>
+          <input id="start" type="date" class="input" />
+        </div>
+        <div>
+          <label for="brand">Brand</label>
+          <input id="brand" class="input" value="Board2Plan" />
+        </div>
+        <div>
+          <label for="goal">Goal</label>
+          <input id="goal" class="input" value="Lead Generation" />
+        </div>
+        <div>
+          <label for="business">Business Type</label>
+          <input id="business" class="input" placeholder="e.g., Restaurant, Coaching, Ecommerce" value="General" />
+        </div>
+        <div>
+          <label for="file">Output file name</label>
+          <input id="file" class="input" value="30Day_Marketing_Plan.xlsx" />
+        </div>
+        <div style="display:flex; align-items:end; justify-content:flex-start;">
+          <button id="download" class="btn">⬇️ Generate & Download Excel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      © <span id="year"></span> Board2Plan • Exports 3 sheets: 30 Day Plan, Analytics (CTR & Engagement formulas), Phase 1.
     </div>
   </div>
 
   <script>
+    // --- utils ---
+    const byId = (id) => document.getElementById(id);
     const fmtDate = (d) => {
       const yyyy = d.getFullYear();
       const mm = String(d.getMonth()+1).padStart(2,'0');
@@ -41,42 +78,138 @@
       return `${yyyy}-${mm}-${dd}`;
     };
     const addDays = (d,n)=> new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
-    const parseDateInput = (str) => {
+    const parseDate = (str)=>{
       if(!str) return null;
-      const parts = str.split('-').map(Number);
-      if(parts.length===3){
-        const d = new Date(parts[0], parts[1]-1, parts[2]);
-        return isNaN(d.getTime())?null:d;
-      }
-      return null;
+      const [y,m,dd]=str.split('-').map(Number);
+      const d=new Date(y,m-1,dd); return isNaN(d)?null:d;
     };
-    const PILLARS=[
-      {name:'Education',tasks:['Share an industry tip','Post a how-to guide','Explain a key term','Repurpose a blog']},
-      {name:'Engagement',tasks:['Run a poll','Ask a question','Start a DM conversation','Host a Q&A']},
-      {name:'Promotion',tasks:['Spotlight a product','Share a limited-time offer','Post a testimonial','Comparison post']},
-      {name:'Storytelling',tasks:['Founder story','Behind-the-scenes','Customer journey','Milestone or lesson']}
-    ];
-    function buildPlanSheet(start,brand,goal){
-      let pillarIdx=0; const taskIdxs=[0,0,0,0];
-      const headerNote=[brand,goal?`Goal: ${goal}`:null].filter(Boolean).join(' — ');
-      const rows=Array.from({length:30},(_,i)=>{
-        const pillar=PILLARS[pillarIdx]; const task=pillar.tasks[taskIdxs[pillarIdx]%pillar.tasks.length];
-        taskIdxs[pillarIdx]++; pillarIdx=(pillarIdx+1)%PILLARS.length;
-        return {Day:i+1,Date:fmtDate(addDays(start,i)),Pillar:pillar.name,'Primary Task':task,'CTA':'','Owner':'','Status':'Not started','Notes':i===0?headerNote:''};
-      });
-      return XLSX.utils.json_to_sheet(rows);
+
+    // default today
+    byId('start').value = fmtDate(new Date());
+    byId('year').textContent = new Date().getFullYear();
+
+    // dynamic task sets by business type
+    function generateBusinessTasks(businessType){
+      const lower = (businessType||'').toLowerCase();
+      if(lower.includes('restaurant')){
+        return [
+          { name:'Education', tasks:['Share a recipe tip','Highlight ingredient sourcing','Nutrition facts post','Chef Q&A video'] },
+          { name:'Engagement', tasks:['Run a menu poll','Ask favorite dish','Invite reviews','Behind‑the‑scenes kitchen story'] },
+          { name:'Promotion', tasks:['Daily special','Happy hour deal','Customer testimonial','Event promotion'] },
+          { name:'Storytelling', tasks:['Origin story','Team spotlight','Customer journey','Community involvement'] },
+        ];
+      } else if(lower.includes('coaching') || lower.includes('consult')){
+        return [
+          { name:'Education', tasks:['Share a framework','Mini case study','Client Q&A','Common mistake to avoid'] },
+          { name:'Engagement', tasks:['Poll about challenges','Ask audience goal','DM conversation starter','Weekly live tip'] },
+          { name:'Promotion', tasks:['Program spotlight','Limited spots left','Testimonial carousel','Book a session CTA'] },
+          { name:'Storytelling', tasks:['Founder motivation','Client success story','Behind the scenes prep','Lesson learned'] },
+        ];
+      } else if(lower.includes('ecommerce') || lower.includes('shop')){
+        return [
+          { name:'Education', tasks:['Product care tips','Style guide','Usage ideas','Comparison chart'] },
+          { name:'Engagement', tasks:['Poll product preference','Ask review','UGC repost','Influencer Q&A'] },
+          { name:'Promotion', tasks:['Discount promo','Bundle deal','Flash sale','Testimonial with product photo'] },
+          { name:'Storytelling', tasks:['Brand story','Maker spotlight','Behind packaging','Milestone celebration'] },
+        ];
+      }
+      // default generic
+      return [
+        { name:'Education', tasks:['Share an industry tip','Post a how‑to guide','Explain a key term','Repurpose a blog'] },
+        { name:'Engagement', tasks:['Run a poll','Ask a question','Start a DM conversation','Host a Q&A'] },
+        { name:'Promotion', tasks:['Spotlight a product','Limited‑time offer','Post a testimonial','Comparison post'] },
+        { name:'Storytelling', tasks:['Founder story','Behind‑the‑scenes','Customer journey','Milestone'] },
+      ];
     }
-    function buildAnalyticsSheet(start){const rows=Array.from({length:30},(_,i)=>({Date:fmtDate(addDays(start,i)),Channel:'',Content:'',Impressions:'',Clicks:'',CTR:'',Engagement:''})); return XLSX.utils.json_to_sheet(rows);}
-    function buildPhase1Sheet(){const week1=[['Day','Task','Area','Owner','Status','Notes'],['Day 1','Define campaign theme','Strategy','','Not started',''],['Day 2','Audit channels','Strategy','','Not started','']]; return XLSX.utils.aoa_to_sheet(week1);}
-    document.getElementById('download').addEventListener('click',()=>{
-      const startStr=document.getElementById('start').value; const parsed=parseDateInput(startStr);
-      if(!parsed){alert('Please pick a valid date'); return;}
-      const brand=document.getElementById('brand').value.trim(); const goal=document.getElementById('goal').value.trim(); const file=document.getElementById('file').value.trim()||'30Day_Marketing_Plan.xlsx';
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,buildPlanSheet(parsed,brand,goal),'30 Day Marketing Plan');
-      XLSX.utils.book_append_sheet(wb,buildAnalyticsSheet(parsed),'Analytics');
-      XLSX.utils.book_append_sheet(wb,buildPhase1Sheet(),'Phase 1');
-      XLSX.writeFile(wb,file);
+
+    function buildPlanSheet(start, brand, goal, businessType){
+      const pillars = generateBusinessTasks(businessType);
+      const headerNote = [brand, goal?`Goal: ${goal}`:null].filter(Boolean).join(' — ');
+      let pillarIdx=0; const taskIdx=Array(pillars.length).fill(0);
+
+      const rows = Array.from({length:30},(_,i)=>{
+        const pillar=pillars[pillarIdx];
+        const task=pillar.tasks[taskIdx[pillarIdx] % pillar.tasks.length];
+        taskIdx[pillarIdx]++; pillarIdx=(pillarIdx+1)%pillars.length;
+        return {
+          Day: i+1,
+          Date: fmtDate(addDays(start,i)),
+          Pillar: pillar.name,
+          'Primary Task': task,
+          'Content Angle / Hook': '',
+          'Channel (IG/FB/LI/TikTok/Email/Blog)': '',
+          'Asset Needed (video, image, carousel, blog)': '',
+          'CTA (book call, read more, shop, reply)': '',
+          Owner: '',
+          Status: 'Not started',
+          Notes: i===0 && headerNote ? headerNote : '',
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = [
+        { wch: 5 }, { wch: 12 }, { wch: 14 }, { wch: 44 }, { wch: 26 },
+        { wch: 28 }, { wch: 32 }, { wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 36 },
+      ];
+      return ws;
+    }
+
+    function buildAnalyticsSheet(start){
+      const rows = Array.from({length:30},(_,i)=> ({
+        Date: fmtDate(addDays(start,i)),
+        Channel: '',
+        Content: '',
+        Impressions: '',
+        Clicks: '',
+        Likes: '',
+        Comments: '',
+        Shares: '',
+        Saves: '',
+        CTR: '',
+        'Engagement Rate': ''
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      for(let r=2; r<=31; r++){
+        ws[`J${r}`] = { f: `IFERROR(E${r}/D${r},0)` };
+        ws[`K${r}`] = { f: `IFERROR((F${r}+G${r}+H${r}+I${r})/D${r},0)` };
+      }
+      ws['!cols'] = [
+        { wch: 12 }, { wch: 12 }, { wch: 40 }, { wch: 12 }, { wch: 10 },
+        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 16 },
+      ];
+      return ws;
+    }
+
+    function buildPhase1Sheet(){
+      const aoa = [
+        ['Day','Task','Area','Owner','Status','Notes'],
+        ['Day 1','Define campaign theme and single KPI','Strategy','','Not started',''],
+        ['Day 2','Audit channels and pick 2 primary platforms','Strategy','','Not started',''],
+        ['Day 3','Draft 10 content hooks & 5 CTAs','Creative','','Not started',''],
+        ['Day 4','Create 3 core assets (video, carousel, image)','Production','','Not started',''],
+        ['Day 5','Schedule next 7 days of posts','Operations','','Not started',''],
+        ['Day 6','Engage: 20 meaningful interactions','Community','','Not started',''],
+        ['Day 7','Report quick wins, adjust hooks/CTAs','Analytics','','Not started',''],
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [{ wch: 8 }, { wch: 48 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 36 }];
+      return ws;
+    }
+
+    byId('download').addEventListener('click', () => {
+      const startStr = byId('start').value;
+      const start = parseDate(startStr);
+      if(!start){ alert('Please choose a valid start date'); return; }
+      const brand = byId('brand').value.trim();
+      const goal = byId('goal').value.trim();
+      const business = byId('business').value.trim();
+      const fname = byId('file').value.trim() || '30Day_Marketing_Plan.xlsx';
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, buildPlanSheet(start, brand, goal, business), '30 Day Marketing Plan');
+      XLSX.utils.book_append_sheet(wb, buildAnalyticsSheet(start), 'Analytics');
+      XLSX.utils.book_append_sheet(wb, buildPhase1Sheet(), 'Phase 1');
+      XLSX.writeFile(wb, fname);
     });
   </script>
 </body>
