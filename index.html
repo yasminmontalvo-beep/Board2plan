@@ -54,6 +54,10 @@
             <option>Ecommerce / Shop</option>
             <option>Real Estate</option>
             <option>SaaS</option>
+            <option>Med Spa</option>
+            <option>Fitness</option>
+            <option>Nonprofit</option>
+            <option>Marketing</option>
           </select>
         </div>
         <div>
@@ -73,56 +77,71 @@
 
   <script>
     const byId = (id) => document.getElementById(id);
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-    // --- Task generator by business type ---
     function generateBusinessTasks(businessType){
-      const t = (businessType||'General').toLowerCase();
-      if(t.includes('restaurant') || t.includes('food')){
-        return [
-          { name:'Education', tasks:['Recipe tip','Ingredient sourcing spotlight','Nutrition facts explainer','Chef Q&A short'] },
-          { name:'Engagement', tasks:['Menu poll','Favorite dish question','Review invite','Kitchen BTS story'] },
-          { name:'Promotion', tasks:['Daily special','Happy hour','Customer testimonial','Event promo'] },
-          { name:'Storytelling', tasks:['Origin story','Team spotlight','Customer journey','Community involvement'] },
-        ];
-      } else if(t.includes('coach') || t.includes('consult')){
-        return [
-          { name:'Education', tasks:['Share a framework','Mini case study','Client Q&A','Common mistake to avoid'] },
-          { name:'Engagement', tasks:['Poll: biggest challenge','Ask audience goal','DM conversation starter','Weekly live tip'] },
-          { name:'Promotion', tasks:['Program spotlight','Limited spots left','Testimonial carousel','Book a session CTA'] },
-          { name:'Storytelling', tasks:['Founder motivation','Client success story','Behind-the-scenes prep','Lesson learned'] },
-        ];
-      } else if(t.includes('ecommerce') || t.includes('shop') || t.includes('retail')){
-        return [
-          { name:'Education', tasks:['Product care tip','Style/usage guide','How it works','Comparison chart'] },
-          { name:'Engagement', tasks:['Poll: product preference','Ask for reviews','UGC repost','Influencer Q&A'] },
-          { name:'Promotion', tasks:['Discount promo','Bundle deal','Flash sale','Testimonial with photo'] },
-          { name:'Storytelling', tasks:['Brand story','Maker spotlight','Behind the packaging','Milestone celebration'] },
-        ];
-      } else if(t.includes('real estate')){
-        return [
-          { name:'Education', tasks:['Market update (local)','Mortgage 101','Neighborhood guide','Inspection checklist'] },
-          { name:'Engagement', tasks:['Poll: buy vs rent','Open house Q&A','This-or-that home features','DM to get comps'] },
-          { name:'Promotion', tasks:['New listing','Price improvement','Client testimonial','Under contract / just sold'] },
-          { name:'Storytelling', tasks:['Agent story','Client journey','Behind the staging','Community highlight'] },
-        ];
-      } else if(t.includes('saas')){
-        return [
-          { name:'Education', tasks:['Feature tip','Use case walkthrough','Template/how-to','Integrations explainer'] },
-          { name:'Engagement', tasks:['Poll: biggest workflow pain','Roadmap AMA','Share your stack','Quick win thread'] },
-          { name:'Promotion', tasks:['Offer spotlight','Free trial push','Customer testimonial','Case study before/after'] },
-          { name:'Storytelling', tasks:['Founder story','Build in public','User journey','Milestone / release notes'] },
-        ];
+      const lower = (businessType||'General').toLowerCase();
+      const mk = (name,tasks)=>({name,tasks});
+      if(lower.includes('restaurant') || lower.includes('food')){
+        return [ mk('Education',['Recipe tip','Ingredient sourcing spotlight','Nutrition facts explainer','Chef Q&A short']),
+                 mk('Engagement',['Menu poll','Favorite dish question','Review invite','Kitchen BTS story']),
+                 mk('Promotion',['Daily special','Happy hour','Customer testimonial','Event promo']),
+                 mk('Storytelling',['Origin story','Team spotlight','Customer journey','Community involvement']) ];
       }
-      // default
-      return [
-        { name:'Education', tasks:['Share an industry tip','How‑to guide','Explain a key term','Repurpose a blog'] },
-        { name:'Engagement', tasks:['Run a poll','Ask a question','Start a DM conversation','Host a Q&A'] },
-        { name:'Promotion', tasks:['Spotlight a product/service','Limited‑time offer','Testimonial','Comparison post'] },
-        { name:'Storytelling', tasks:['Founder story','Behind‑the‑scenes','Customer journey','Milestone'] },
-      ];
+      if(lower.includes('coach') || lower.includes('consult')){
+        return [ mk('Education',['Share a framework','Mini case study','Client Q&A','Common mistake to avoid']),
+                 mk('Engagement',['Poll: biggest challenge','Ask audience goal','DM conversation starter','Weekly live tip']),
+                 mk('Promotion',['Program spotlight','Limited spots left','Testimonial carousel','Book a session CTA']),
+                 mk('Storytelling',['Founder motivation','Client success story','Behind-the-scenes prep','Lesson learned']) ];
+      }
+      if(lower.includes('ecommerce') || lower.includes('shop') || lower.includes('retail')){
+        return [ mk('Education',['Product care tip','Style/usage guide','How it works','Comparison chart']),
+                 mk('Engagement',['Poll: product preference','Ask for reviews','UGC repost','Influencer Q&A']),
+                 mk('Promotion',['Discount promo','Bundle deal','Flash sale','Testimonial with photo']),
+                 mk('Storytelling',['Brand story','Maker spotlight','Behind the packaging','Milestone celebration']) ];
+      }
+      if(lower.includes('real estate')){
+        return [ mk('Education',['Market update (local)','Mortgage 101','Neighborhood guide','Inspection checklist']),
+                 mk('Engagement',['Poll: buy vs rent','Open house Q&A','This-or-that features','DM to get comps']),
+                 mk('Promotion',['New listing','Price improvement','Client testimonial','Under contract / just sold']),
+                 mk('Storytelling',['Agent story','Client journey','Behind the staging','Community highlight']) ];
+      }
+      if(lower.includes('saas')){
+        return [ mk('Education',['Feature tip','Use case walkthrough','Template/how-to','Integrations explainer']),
+                 mk('Engagement',['Poll: workflow pain','Roadmap AMA','Share your stack','Quick win thread']),
+                 mk('Promotion',['Offer spotlight','Free trial push','Customer testimonial','Case study before/after']),
+                 mk('Storytelling',['Founder story','Build in public','User journey','Release milestone']) ];
+      }
+      if(lower.includes('med spa') || lower.includes('medspa') || lower.includes('aesthetic')){
+        return [ mk('Education',['Treatment 101 (e.g., Botox/laser)','Pre-/post-care tips','Safety & credentials','What to expect']),
+                 mk('Engagement',['Poll: treatment goals','Skin concern Q&A','Before/after reaction thread','Myth vs fact']),
+                 mk('Promotion',['New-patient special','Package bundle','Limited slots announcement','Testimonial with consent']),
+                 mk('Storytelling',['Provider spotlight','Client journey (blurred)','Clinic BTS','Community/charity day']) ];
+      }
+      if(lower.includes('fitness') || lower.includes('gym') || lower.includes('trainer')){
+        return [ mk('Education',['Form tip','Beginner workout plan','Macro basics','Recovery routine']),
+                 mk('Engagement',['Challenge sign-up poll','PR shoutouts','Q&A: obstacles','Habit tracker check-in']),
+                 mk('Promotion',['Free trial week','Class pass bundle','Referral perk','Client testimonial video']),
+                 mk('Storytelling',['Coach origin story','Member transformation','Behind the class programming','Event recap']) ];
+      }
+      if(lower.includes('nonprofit') || lower.includes('non-profit') || lower.includes('charity')){
+        return [ mk('Education',['Mission explainer','Problem overview','How donations are used','Volunteer roles']),
+                 mk('Engagement',['Poll: causes people care about','Volunteer spotlight Q&A','AMA with program lead','Community survey']),
+                 mk('Promotion',['Donation drive','Matching gift push','Event registration','Corporate partnership ask']),
+                 mk('Storytelling',['Beneficiary story (consent)','Impact milestone','Behind the mission','Thank-you reel']) ];
+      }
+      if(lower.includes('marketing') || lower.includes('agency')){
+        return [ mk('Education',['Strategy framework','Audit teardown','Channel playbook','Creative hooks pack']),
+                 mk('Engagement',['Poll: biggest bottleneck','Swipe-file share','Caption roast (friendly)','Tool stack AMA']),
+                 mk('Promotion',['Offer spotlight','Free audit CTA','Case study carousel','Limited cohort']),
+                 mk('Storytelling',['Founder POV','Client journey','Behind the shoot','Campaign post-mortem']) ];
+      }
+      return [ mk('Education',['Share an industry tip','How‑to guide','Explain a key term','Repurpose a blog']),
+               mk('Engagement',['Run a poll','Ask a question','Start a DM conversation','Host a Q&A']),
+               mk('Promotion',['Spotlight a product/service','Limited‑time offer','Testimonial','Comparison post']),
+               mk('Storytelling',['Founder story','Behind‑the‑scenes','Customer journey','Milestone']) ];
     }
 
-    // --- Sheets ---
     function buildPlanSheet(brand, goal, businessType){
       const pillars = generateBusinessTasks(businessType);
       const headerNote = [brand, goal ? `Goal: ${goal}` : null].filter(Boolean).join(' — ');
@@ -163,8 +182,11 @@
       if(t.includes('restaurant')) rows[0].Examples = 'Menu myths, sourcing story, poll: spicy or mild?';
       if(t.includes('coach')) rows[1].Examples = 'Framework carousel, client breakdown, AMA clip';
       if(t.includes('ecommerce') || t.includes('shop')) rows[2].Examples = 'UGC try‑on, testimonial reel, before/after photo';
+      if(t.includes('med spa')) rows[0].Examples = 'Treatment myths, skincare routines, poll: goals (wrinkles, texture, glow)';
+      if(t.includes('fitness')) rows[0].Examples = 'Form tips, mini workouts, poll: goals (strength, fat loss, mobility)';
+      if(t.includes('nonprofit')) rows[0].Examples = 'Mission snapshots, program myths, poll: causes audience supports';
       const ws = XLSX.utils.json_to_sheet(rows);
-      ws['!cols'] = [{ wch: 20 }, { wch: 22 }, { wch: 30 }, { wch: 48 }];
+      ws['!cols'] = [{ wch: 20 }, { wch: 22 }, { wch: 30 }, { wch: 60 }];
       return ws;
     }
 
@@ -206,8 +228,6 @@
       return ws;
     }
 
-    // Wiring
-    document.getElementById('year').textContent = new Date().getFullYear();
     document.getElementById('download').addEventListener('click', ()=>{
       const brand = byId('brand').value.trim();
       const goal = byId('goal').value.trim();
